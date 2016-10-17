@@ -28,6 +28,33 @@ module room_cutout(size, walls=[1, 1, 1]) {
      cube([for (i = [0:1:2]) size[i]+walls[i]]);
 }
 
+module spiral_stair_segment(height=1, stair_dia=in2ft(72), start_angle=0, end_angle=30) {
+     cylinder(abs(height), d=in2ft(.5)+in2ft(sqrt(stair_dia)), center=true, $fs=.01, $fa=1);
+     translate([0, 0, in2ft(-0.5)]) {
+       difference() {
+         cylinder(in2ft(1), d=stair_dia, $fs=.1, $fa=5);
+         rotate([0, 0, start_angle+180]) {
+           translate([-(stair_dia+1)/2, 0, in2ft(-0.5)]) {
+             cube([stair_dia+1, stair_dia+1, in2ft(2)]);
+           }
+         }
+         rotate([0, 0, end_angle]) {
+           translate([-(stair_dia+1)/2, 0, in2ft(-0.5)]) {
+             cube([stair_dia+1, stair_dia+1, in2ft(2)]);
+           }
+         }
+       }
+     }
+}
+
+module spiral_stair(height, stair_dia) {
+     for (s = [0:1:11]) {
+          translate([0, 0, s*height/12]) {
+               spiral_stair_segment(height/12, stair_dia, 30*s, 30*s+35);
+          }
+     }
+}
+
 module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   door_height = in2ft(80);
   width = stair_dia + 2*door_width;
@@ -73,6 +100,12 @@ module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
       // stairwell
       translate([width/2, length/2, -2]) {
         cylinder(height+5, d=stair_dia, $fs=.1, $fa=5);
+      }
+    }
+    // stairs
+    translate([width/2, length/2, 0]) {
+      rotate([0, 0, -120]) {
+        spiral_stair(height, stair_dia);
       }
     }
   }
@@ -169,11 +202,15 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
     }
     // railing
     railing(3, vent_radius*2);
-    // vestibules
+    // vestibules and stairs
     for (s = [0:1:5]) {
       angle = 60*(s-2);
       translate([r*sin(angle), r*cos(angle), 0]) {
-        if (!layout[s]) {
+        if (layout[s]) {
+          rotate([0, 0, -angle-120]) {
+            spiral_stair(height, stair_dia);
+          }
+        } else {
           rotate([0, 0, -angle]) {
             vestibule(height, stair_dia, door_width);
           }
