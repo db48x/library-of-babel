@@ -15,6 +15,19 @@ module doorway(width, height, arch=false) {
   }
 }
 
+module room(size, walls=[1, 1, 1]) {
+     difference() {
+          cube([for (i = [0:1:2]) size[i]+walls[i]]);
+          translate([for (i = [0:1:2]) walls[i]/2]) {
+               cube(size);
+          }
+     }
+}
+
+module room_cutout(size, walls=[1, 1, 1]) {
+     cube([for (i = [0:1:2]) size[i]+walls[i]]);
+}
+
 module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   door_height = in2ft(80);
   width = stair_dia + 2*door_width;
@@ -22,9 +35,18 @@ module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   //echo(width+1, length+2);
   translate([-width/2, -length/2, 0]) {
     difference() {
-      // walls
-      translate([-0.5, -1, 0]) {
-        cube([width+1, length+2, height]);
+      union() {
+        // walls
+        translate([-0.5, -1, 0]) {
+          cube([width+1, length+2, height]);
+        }
+        // compartments
+        translate([-3-0.5-in2ft(8), .25*length-.25-door_width/2-in2ft(4), 0.75]) {
+          room([door_width+in2ft(8), door_width+in2ft(8), 7.5], [0.5, 0.5, 0.5]);
+        }
+        translate([width, .75*length-door_width/2+in2ft(4)-5, 0.75]) {
+          room([6, 8, 7.5], [0.5, 0.5, 0.5]);
+        }
       }
       // interior
       translate([0, 0, 1]) {
@@ -65,6 +87,13 @@ module vestibule_cutout(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
     // walls
     translate([-0.5, -1, 1]) {
       cube([width+1, length+2, height+1]);
+    }
+    // compartments
+    translate([-3-0.5-in2ft(8), .25*length-.25-door_width/2-in2ft(4), 0.75]) {
+      room_cutout([door_width+in2ft(8), door_width+in2ft(8), 7.5], [0.5, 0.5, 0.5]);
+    }
+    translate([width, .75*length-door_width/2+in2ft(4)-5, 0.75]) {
+      room_cutout([6, 8, 7.5], [0.5, 0.5, 0.5]);
     }
     // stairwell
     translate([width/2, length/2, -2]) {
