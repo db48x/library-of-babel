@@ -136,6 +136,8 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
   inner_apothem = inner_radius/(2*sqrt(3)/3);
   outer_apothem = inner_apothem+thickness;
   outer_radius = outer_apothem*(2*sqrt(3)/3);
+  vent_area = (3/2*sqrt(3)*inner_radius*inner_radius)/4;
+  vent_radius = sqrt(vent_area/3.141592);
   r = outer_apothem;
   translate(center) {
     difference() {
@@ -162,11 +164,11 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
       }
       // ventilation shaft
       translate([0, 0, -1]) {
-        cylinder(3, d=inner_radius/sqrt(2), $fs=.1, $fa=5);
+        cylinder(3, d=vent_radius*2, $fs=.1, $fa=5);
       }
     }
     // railing
-    railing(3, inner_radius/sqrt(2));
+    railing(3, vent_radius*2);
     // vestibules
     for (s = [0:1:5]) {
       angle = 60*(s-2);
