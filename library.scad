@@ -183,20 +183,21 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
   }
 }
 
-stair_dia=in2ft(72);
-hex_radius = gallery_radius(22, stair_dia);
+stair_dia=in2ft(60);
+hex_inner_radius = 16;
+hex_radius = gallery_radius(hex_inner_radius, stair_dia);
 hex_height = 11;
 function hex2coord(q, r, z) = [ hex_radius * 3/2 * q, hex_radius * sqrt(3) * (r + q/2), hex_height * z ];
 
-gallery(hex2coord(0, 0, 0), 22, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord(1, 0, 0), 22, hex_height, stair_dia, layout=[0, 0, 1, 1, 1, 1]);
-gallery(hex2coord(1, -1, 0), 22, hex_height, stair_dia, layout=[0, 1, 1, 1, 0, 1]);
-gallery(hex2coord(0, -1, 0), 22, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord(-1, 0, 0), 22, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord(-1, 1, 0), 22, hex_height, stair_dia, layout=[0, 1, 0, 1, 1, 1]);
-gallery(hex2coord(0, 1, 0), 22, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
+gallery(hex2coord( 0,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
+gallery(hex2coord( 1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 0, 1, 1, 1, 1]);
+gallery(hex2coord( 1, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 1, 0, 1]);
+gallery(hex2coord( 0, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
+gallery(hex2coord(-1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
+gallery(hex2coord(-1,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 0, 1, 1, 1]);
+gallery(hex2coord( 0,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
 
-gallery(hex2coord(0, 0, 1), 22, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
-gallery(hex2coord(1, 0, 1), 22, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
-gallery(hex2coord(0, 1, 1), 22, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
-gallery(hex2coord(-1, 1, 1), 22, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
+gallery(hex2coord( 0,  0,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
+gallery(hex2coord( 1,  0,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
+gallery(hex2coord( 0,  1,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
+gallery(hex2coord(-1,  1,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
