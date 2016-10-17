@@ -47,10 +47,31 @@ module spiral_stair_segment(height=1, stair_dia=in2ft(72), start_angle=0, end_an
      }
 }
 
-module spiral_stair(height, stair_dia) {
+module spiral_stair(height, stair_dia, railing=false) {
      for (s = [0:1:11]) {
           translate([0, 0, s*height/12]) {
                spiral_stair_segment(height/12, stair_dia, 30*s, 30*s+35);
+          }
+     }
+     if (railing) {
+          railing_height = height-2+in2ft(4);
+          railing_slope = railing_height/height;
+          translate([0, 0, 5-in2ft(2)]) {
+               linear_extrude(railing_height, twist=-360*railing_height/height, $fn=72) {
+                    rotate([0, 0, 60-60*in2ft(4)/height])
+                    translate([stair_dia/2-in2ft(0.5), 0, 0]) {
+                         square(in2ft(2), in2ft(1), center=true);
+                    }
+               }
+          }
+          for (s = [2:2:13]) {
+               rotate([0, 0, 30*s+2.5]) {
+                    translate([stair_dia/2-in2ft(0.5), 0, (s-1)*height/12]) {
+                         rotate([0, 0, 45]) {
+                              cylinder(4, d=in2ft(1), $fn=4);
+                         }
+                    }
+               }
           }
      }
 }
@@ -105,7 +126,7 @@ module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
     // stairs
     translate([width/2, length/2, 0]) {
       rotate([0, 0, -120]) {
-        spiral_stair(height, stair_dia);
+        spiral_stair(height, stair_dia, railing=true);
       }
     }
   }
@@ -208,7 +229,7 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
       translate([r*sin(angle), r*cos(angle), 0]) {
         if (layout[s]) {
           rotate([0, 0, -angle-120]) {
-            spiral_stair(height, stair_dia);
+            spiral_stair(height, stair_dia, railing=true);
           }
         } else {
           rotate([0, 0, -angle]) {
