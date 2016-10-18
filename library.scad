@@ -47,6 +47,12 @@ module spiral_stair_segment(height=1, stair_dia=in2ft(72), start_angle=0, end_an
      }
 }
 
+module spiral_stair_cutout(height, stair_dia) {
+     translate([0, 0, -2]) {
+          cylinder(height+4, d=stair_dia, $fs=.1, $fa=5);
+     }
+}
+
 module spiral_stair(height, stair_dia, railing=false) {
      for (s = [0:1:11]) {
           translate([0, 0, s*height/12]) {
@@ -125,9 +131,7 @@ module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
     }
     // stairs
     translate([width/2, length/2, 0]) {
-      rotate([0, 0, -120]) {
-        spiral_stair(height, stair_dia, railing=true);
-      }
+      spiral_stair(height, stair_dia, railing=true);
     }
   }
 }
@@ -192,7 +196,6 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
   outer_radius = outer_apothem*(2*sqrt(3)/3);
   vent_area = (3/2*sqrt(3)*inner_radius*inner_radius)/4;
   vent_radius = sqrt(vent_area/3.141592);
-  r = outer_apothem;
   translate(center) {
     difference() {
       // outer wall
@@ -203,15 +206,14 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
       }
       // stairwells and vestibule cutouts
       for (s = [0:1:5]) {
-        angle = 60*(s-2);
-        translate([r*sin(angle), r*cos(angle), 0]) {
-          if (layout[s]) {
-            translate([0, 0, -2]) {
-              cylinder(height+4, d=stair_dia, $fs=.1, $fa=5);
-            }
-          } else {
-            rotate([0, 0, -angle]) {
-              vestibule_cutout(height-1, stair_dia, door_width);
+        rotate([0, 0, 60*s+30]) {
+          translate([outer_apothem, 0, 0]) {
+            rotate([0, 0, 90]) {
+              if (layout[s]) {
+                spiral_stair_cutout(height, stair_dia, railing=true, angle=-120);
+              } else {
+                vestibule_cutout(height, stair_dia, door_width);
+              }
             }
           }
         }
@@ -225,15 +227,14 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
     railing(3, vent_radius*2);
     // vestibules and stairs
     for (s = [0:1:5]) {
-      angle = 60*(s-2);
-      translate([r*sin(angle), r*cos(angle), 0]) {
-        if (layout[s]) {
-          rotate([0, 0, -angle-120]) {
-            spiral_stair(height, stair_dia, railing=true);
-          }
-        } else {
-          rotate([0, 0, -angle]) {
-            vestibule(height, stair_dia, door_width);
+      rotate([0, 0, 60*s+30]) {
+        translate([outer_apothem, 0, 0]) {
+          rotate([0, 0, 90]) {
+            if (layout[s]) {
+              spiral_stair(height, stair_dia, railing=true, angle=-120);
+            } else {
+              vestibule(height, stair_dia, door_width);
+            }
           }
         }
       }
