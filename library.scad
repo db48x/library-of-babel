@@ -49,7 +49,7 @@ module spiral_stair_segment(height=1, stair_dia=in2ft(72), start_angle=0, end_an
 
 module spiral_stair_cutout(height, stair_dia) {
      translate([0, 0, -2]) {
-          cylinder(height+4, d=stair_dia, $fs=.1, $fa=5);
+          cylinder(height+8, d=stair_dia, $fs=.1, $fa=5);
      }
 }
 
@@ -82,11 +82,28 @@ module spiral_stair(height, stair_dia, railing=false) {
      }
 }
 
+module spiral_stair_a(height, stair_dia, railing=false) {
+     intersection() {
+          spiral_stair(height, stair_dia, railing=railing);
+          translate([-(stair_dia+1)/2, -stair_dia/2-1, -0.5]) {
+               cube([stair_dia+1, stair_dia/2+1, height+4]);
+          }
+     }
+}
+
+module spiral_stair_b(height, stair_dia, railing=false) {
+     intersection() {
+          spiral_stair(height, stair_dia, railing=railing);
+          translate([-(stair_dia+1)/2, 0, -0.5]) {
+               cube([stair_dia+1, stair_dia/2+1, height+4]);
+          }
+     }
+}
+
 module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   door_height = in2ft(80);
   width = stair_dia + 2*door_width;
   length = 1.1*(stair_dia + 2*door_width);
-  //echo(width+1, length+2);
   translate([-width/2, -length/2, 0]) {
     difference() {
       union() {
@@ -136,11 +153,32 @@ module vestibule(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   }
 }
 
+module vestibule_a(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
+  width = stair_dia + 2*door_width + 12 + 1;
+  length = 1.1*(stair_dia + 2*door_width);
+  intersection() {
+       vestibule(height, stair_dia, door_width);
+       translate([-width/2-1, -length/2-2, -1]) {
+         cube([width+2, length/2+2, height+2]);
+       }
+  }
+}
+
+module vestibule_b(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
+  width = stair_dia + 2*door_width + 12 + 1;
+  length = 1.1*(stair_dia + 2*door_width);
+  intersection() {
+       vestibule(height, stair_dia, door_width);
+       translate([-width/2-1, 0, -1]) {
+         cube([width+2, length/2+2, height+2]);
+       }
+  }
+}
+
 module vestibule_cutout(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
   door_height = in2ft(80);
   width = stair_dia + 2*door_width;
   length = 1.1*(stair_dia + 2*door_width)+2;
-  //echo(width+1, length+2);
   translate([-width/2, -length/2, 0]) {
     // walls
     translate([-0.5, -1, 1]) {
@@ -159,6 +197,29 @@ module vestibule_cutout(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
     }
   }
 }
+
+module vestibule_a_cutout(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
+  width = stair_dia + 2*door_width + 12 + 1;
+  length = 1.1*(stair_dia + 2*door_width);
+  intersection() {
+       vestibule_cutout(height, stair_dia, door_width);
+       translate([-width/2-1, -length/2-2, -1]) {
+         cube([width+2, length/2+2, height+2]);
+       }
+  }
+}
+
+module vestibule_b_cutout(height, stair_dia=in2ft(48), door_width=in2ft(36)) {
+  width = stair_dia + 2*door_width + 12 + 1;
+  length = 1.1*(stair_dia + 2*door_width);
+  intersection() {
+       vestibule_cutout(height, stair_dia, door_width);
+       translate([-width/2-1, 0, -1]) {
+         cube([width+2, length/2+2, height+2]);
+       }
+  }
+}
+
 
 module railing(height, inner_dia) {
   inner_radius = inner_dia/2;
@@ -212,7 +273,13 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
               if (layout[s]) {
                 spiral_stair_cutout(height, stair_dia, railing=true, angle=-120);
               } else {
-                vestibule_cutout(height, stair_dia, door_width);
+                if (s % 2) {
+                  rotate([0, 0, -180]) {
+                    vestibule_cutout(height, stair_dia, door_width);
+                  }
+                } else {
+                  vestibule_cutout(height, stair_dia, door_width);
+                }
               }
             }
           }
@@ -231,9 +298,21 @@ module gallery(center, inner_radius, height, stair_dia=in2ft(48), layout=[0, 1, 
         translate([outer_apothem, 0, 0]) {
           rotate([0, 0, 90]) {
             if (layout[s]) {
-              spiral_stair(height, stair_dia, railing=true, angle=-120);
+              if (s % 2) {
+                rotate([0, 0, -180]) {
+                  spiral_stair_a(height, stair_dia, railing=true, angle=-120);
+                }
+              } else {
+                spiral_stair_b(height, stair_dia, railing=true, angle=-120);
+              }
             } else {
-              vestibule(height, stair_dia, door_width);
+              if (s % 2) {
+                rotate([0, 0, -180]) {
+                  vestibule_a(height, stair_dia, door_width);
+                }
+              } else {
+                vestibule_b(height, stair_dia, door_width);
+              }
             }
           }
         }
@@ -248,15 +327,15 @@ hex_radius = gallery_radius(hex_inner_radius, stair_dia);
 hex_height = 11;
 function hex2coord(q, r, z) = [ hex_radius * 3/2 * q, hex_radius * sqrt(3) * (r + q/2), hex_height * z ];
 
-gallery(hex2coord( 0,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord( 1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 0, 1, 1, 1, 1]);
-gallery(hex2coord( 1, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 1, 0, 1]);
-gallery(hex2coord( 0, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord(-1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
-gallery(hex2coord(-1,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 0, 1, 1, 1]);
-gallery(hex2coord( 0,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
+gallery(hex2coord( 0,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 1, 0, 1]);
+gallery(hex2coord( 1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 0, 1, 1]);
+gallery(hex2coord( 1, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 1, 1, 0, 0]);
+gallery(hex2coord( 0, -1,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
+gallery(hex2coord(-1,  0,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
+gallery(hex2coord(-1,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[0, 1, 1, 1, 0, 1]);
+gallery(hex2coord( 0,  1,  0), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
 
-gallery(hex2coord( 0,  0,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
+gallery(hex2coord( 0,  0,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 1, 1, 0]);
 gallery(hex2coord( 1,  0,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 0, 1, 0, 1]);
-gallery(hex2coord( 0,  1,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 0, 1, 1]);
+gallery(hex2coord( 0,  1,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 1, 1, 1, 0, 0]);
 gallery(hex2coord(-1,  1,  1), hex_inner_radius, hex_height, stair_dia, layout=[1, 0, 1, 1, 0, 1]);
